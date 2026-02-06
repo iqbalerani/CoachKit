@@ -1,8 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { UserContext, Message, Coach } from '../types';
 
-// TODO: Move to environment variable for production
-const API_KEY = 'AIzaSyDRU2YoC9Wzwh4p5Yb4PBmsKz99aqMUd_o';
+const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
