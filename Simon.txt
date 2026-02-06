@@ -1,0 +1,63 @@
+## Who Simon Is
+
+Simon is a London-based theatre director turned tech/productivity YouTuber and Notion Ambassador. He started Better Creating during the pandemic as a creative outlet while freelancing in theatre (he's directed for the Royal Shakespeare Company and the National Theatre). It grew into a full-time 6-figure digital product business — primarily Notion templates and courses. He has over 26,000 template downloads and a dedicated community of productivity-obsessed builders.
+
+His Instagram bio captures his identity perfectly: *"Beautiful tech meets productive ideas. Create your best life!"*
+
+## His Core Philosophy
+
+Three principles define everything Simon does:
+
+**1. "Achieve more with less effort"** — This is his mantra. He calls it "Part-Time Productivity" — the idea that you shouldn't grind harder, you should build smarter systems. His Skillshare course is literally titled *"Productivity Simplified: Achieve Your Goals With Minimal Effort."* He draws from essentialism — doing fewer things but doing them exceptionally well.
+
+**2. Simplicity as a design principle** — Simon loves minimalism. His iOS design packs are described as "calm, custom & complete." His templates are described as "simplified." His whole brand aesthetic is clean, spacious, and intentional. He's a mid-century design enthusiast. Nothing cluttered, nothing noisy.
+
+**3. Systems over willpower** — He believes in building structured frameworks that do the heavy lifting. His "Second Brain" templates, Life OS, habit trackers, and goal planners all share the same DNA: give people a pre-built system they can plug into and customize, rather than expecting them to figure it out from scratch.
+
+## The AgentOS Breakthrough — What Matters Most for CoachKit
+
+This is where it gets critical. Simon's most recent and most excited product is **AgentOS** — and it reveals exactly where his head is at:
+
+**The concept:** One AI agent with multiple specialist "modes" — productivity coach, decision coach, goal-setting coach, content writer, strategist, personal assistant. The agent (which he named **S(ai)mon**) auto-selects the right mode based on what you ask it. It's not multiple chatbots — it's one intelligent system that adapts.
+
+**Key design decisions in AgentOS:**
+- **Personality + tone + memory + self-improvement feedback** baked into the agent instructions
+- **6 pre-built specialist modes** that get selected automatically
+- A **"New Mode" template button** so users can create their own specialist agents
+- Full onboarding with prompts library and use-case guides
+- The agent has a **Notes section where it can self-improve** based on user feedback
+
+**His pricing model:** AgentOS is $89 for the complete system. Individual modes (Essentialist Productivity Coach, Decision Coach) are free or $15 each. The Personality Switcher (mode manager) is $25. This is a modular approach — free hooks you in, individual purchases let you taste it, the full system is the premium tier.
+
+**What excited him most about Notion 3.0 Agent:** He literally said he cancelled ChatGPT and Claude subscriptions because Notion Agent gave him both — but with the context of his workspace. The killer feature for him is **context-awareness** — an AI that knows your data, your goals, your style.
+
+## His Audience
+
+Simon's audience is productivity-obsessed, design-sensitive, system-builders. They are:
+
+- **Freelancers, solopreneurs, creators, coaches** who run their own businesses
+- People who value **great design** — they care about how things look and feel
+- **Notion power users** or people aspiring to be — they love building and customizing
+- Interested in **AI as a practical tool**, not as a novelty — they want agents that actually do work
+- Willing to pay for quality ($89 for a Notion template is significant — his audience trusts him and values premium)
+- They follow people like Cal Newport — the "deep work, less busywork" crowd
+
+## What This Means for CoachKit
+
+Here's how Simon's world directly maps to what CoachKit should feel like:
+
+**1. Agent-first, not chat-first.** Simon's audience doesn't want "another chatbot." They want specialist agents with clear identities, methodologies, and personalities. Each coach in CoachKit should feel like a distinct agent with a name, a philosophy, and a way of working — not just a different system prompt behind the same chat UI.
+
+**2. The "S(ai)mon" naming pattern matters.** He branded his AI agent as a version of himself. CoachKit coaches should feel like they have real identities — not generic labels like "Productivity Coach" but named personalities with character.
+
+**3. Multi-mode is the architecture his audience understands.** They already know what it means to switch between specialist agents. CoachKit's coach library should feel like a mode selector, not a marketplace.
+
+**4. Design must be minimal, calm, and premium.** Simon's entire brand is clean whites, subtle shadows, generous spacing, and restrained color. Think Apple-inspired, not Duolingo-gamified. The current CoachKit colors and visual style are the opposite of what his audience expects.
+
+**5. Onboarding should feel like setup, not registration.** AgentOS has a "10-minute setup" where you connect your context. CoachKit onboarding should feel like configuring your personal coaching system — entering your context, values, and goals — not filling out a form.
+
+**6. Builder/Creator tier is native to this audience.** Simon's audience doesn't just consume — they build. The mode template button in AgentOS proves this. CoachKit's "create your own coach" feature isn't a nice-to-have; it's core to audience fit.
+
+**7. Free coaches → premium system.** Mirror his pricing psychology: individual coaches free, the full personalized system (context, memory, custom coaches, sharing) behind the paywall.
+
+The bottom line: Simon's audience wants CoachKit to feel like **a beautifully designed agent OS for personal coaching** — minimal, smart, and empowering — not a flashy chatbot app.

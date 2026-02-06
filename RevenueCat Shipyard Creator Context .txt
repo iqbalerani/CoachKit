@@ -1,0 +1,91 @@
+Gabby Beckford
+Hi, developers. I'm Gabby Beckford. I go by PaxLight online. I am a travel and lifestyle content creator and speaker.
+
+But what I really do is help women in their late twenties to late forties build their dream lives and take their dream trips. I have a community of about a million plus online, and it is full of smart, ambitious women who want to live big, bold lives of adventure in every way. They want to see the world, travel solo, negotiate six figure salaries, achieve financial freedom. They want it all, and I think they can have it.
+
+The problem is that there's still this massive gap between inspiration and action. Sometimes they still get kind of stuck waiting for permission, waiting to feel confident, or, like, waiting for a sign that this is meant for them. So they stay stuck. And they trust me lot to help them close that gap with my personal stories and my tips, but I want your help to help me take that beyond social media.
+
+I think my dream app combines mindset with micro actions. I'm thinking daily challenges, wins tracking, gamification in some way, maybe confetti even popping up when they achieve one of their bucket list dreams. Think ambitious, worldly, warm, but just get creative. Show me how you would help ambitious women go from dreaming to doing as fast and as fun as possible.
+
+Thank you. I cannot wait to see what you build.
+
+---------------------
+Rebecca Louise
+Hi everyone. So I've done a little bit of research and I have come up with an idea for an app that I think is on high demand. So I've noticed that there are a huge amount of my mum followers who are extremely short on time or knowledge on how to improve their financial situations so they would love an app that they can hop onto that would either give them advice on how to save money in everyday life so where they should shop, how they could batch cook, what certain meals cost to prepare versus other meals and ways to renovate your house and save money, how to just save money on day to day life and then also on the flip side another part of the app that might show them how to invest their money, so whatever money they do have, how to multiply and how to make more of what they already have.
+
+So that seems to be something that is a real interest of mums who are extremely busy, have huge time restraints but want to have their own financial independence.
+
+-------------------------
+Josh
+If you wanna invest to make your savings profitable, you're gonna have a problem, and that is that your investments will be spread across numerous different platforms and structures. For example, you may have shares in Renta Quattro, have invested in gold through financial derivatives with XTB, have funds in Rent A Four, or invest in fixed income products on specialized platforms. What's more, you may have real estate investments, physical silver, or a large amount of money in an interest bearing account. This is a mess.
+
+And for an investor who wants to have everything under control for monitoring purposes, it would be great to have one app that allows users to list all of their investments, with the app itself updating their performance in real time. In other words, if I have gold or stocks, the app would update their price. Or if I have products that are not listed, such as fixed income, I could simply enter them so that the system would notify me of the amortization times. But wait, there's more.
+
+When building a portfolio, it's very important that it is well diversified. As a premium paid feature, the app could offer a risk analysis of the portfolio, indicating possible improvements. For example, it could report on the level of exposure to a specific sector or country. In other words, if I have a lot of US stocks, the app should inform me that I am very exposed to that country.
+
+This is the basic concept, a product that many investors would be willing to use. From here, each developer can take the approach they deem most appropriate or even contribute new ideas. That is now in your hands. All the best, and good luck with the project.
+
+
+--------
+Sam Beckman
+Okay. Here's my problem. I absolutely rely on reminders to function. Watering plants, reminder. Emptying bins, reminder.
+
+Even publishing YouTube videos. If it's not a reminder, it's not happening. So what's the issue? Well, the reminder app that I use on Android doesn't exist on iOS.
+
+And as a phone reviewer, every time I switch platforms, I have to rebuild all my reminders from scratch. So why not just use Google Calendar? Because I don't want dozens of personal reminders cluttering a calendar that I share with my wife for actual events. Okay.
+
+Then why don't I just find a reminder app that works on both iOS and Android? Well, I've tried pretty much all of them and not one of them hit all four of my most important features. First, custom snoozing. If I'm filming with my phone and a reminder pops up, I wanna be able to snooze it for, let's say, exactly twenty two minutes directly from the notification without ever having to open the app.
+
+Second, powerful recurring reminders. Most of my tasks repeat weekly, every few days, every few months, even hourly. I need recurring tasks and I need full control of them. Third, proper syncing.
+
+If I dismiss a reminder on one phone, it should disappear everywhere. I don't want old phones exploding with missed notifications. And then last but absolutely not least, the app also needs to look great and feel smooth too. So that's The Brief.
+
+A beautiful fully functional reminders app that works properly on both iOS and Android. And I cannot wait to see what you come up with.
+
+-----------------------
+Eitan Bernath
+Hello. My name is Aitum Bernath. I am a twenty three year old chef, content creator, cookbook author, and the principal culinary contributor on The Drew Barrymore Show. In short, I cook on the Internet and on television to hopefully get people excited to get in the kitchen.
+
+Now, my idea for an app is centered around the concept that people, especially nowadays are inundated with recipes, whether in their cookbooks, I have a big cookbook collection, as you can see behind me or on social media. And I feel like actually getting it from something you see and wanna make to in your kitchen can be a challenge for people. And so there's kind of two areas where I have this idea. One is on the cookbook side of, you know, if I can like tell some app all the cookbooks I have in my collection, and then let's say in the fridge, I have chicken, broccoli, you know, a few ingredients.
+
+I can then tell this is what I have in the kitchen. And, you know, are there any recipes in my cookbooks that have that in it? Just an idea. Mean, that might be hard with copyright, but that's one idea.
+
+Then the other one is some type of tool where you can, you know, give the app a link to a video you saw or different videos you've seen on the Internet that you wanna make, and it will actually write a food list for you that you can go grocery shopping with to actually then make it. I mean, honestly, anything just in that genre of getting people to actually cook the recipes that they want to make and making the process of grocery shopping and getting it from an idea into their kitchen possible. Very excited to see what you come up with.
+---------------------
+Quin Gable
+I have a problem, and I'm really hoping you can help. I've been a solo woman van lifer for the last five years. Ignore this house. My van is currently in the shop, and I really struggle making friends and dating while living in a van.
+
+Because it's kind of like finding a needle in a haystack. I'm looking for someone to travel with me, not necessarily stay in one spot. And so when I'm going to all these new locations and trying to date, it just kind of fails every time because I'm leaving and they're staying put. So what I'm looking for is a dating app or a community app that helps me make friends and also date other van lifers and other nomadic people.
+
+And there really isn't an app for us. I feel like this is a huge missed opportunity. So here's what I'm thinking. I want a van life app that is focused on a few different things.
+
+I want a nomadic dating portion where other nomads can date other nomads. I want a section about making friends based on activities or just friends in general. There could be climbing, snowboarding, skiing, hiking. And three, I want there to be a builder aspect of it too where people who are building their vans can connect with other builders for a fee to get help on what might be going wrong in their van.
+
+I'd also love to include a feature where it's invite only. The nomadic community is really small and really protected, and I wanna make sure, especially with me as a woman, that everyone has been accounted for. You know what I'm saying? I wanna make sure people have chatting options, swiping options, hobby options, really anything that would comfortably connect those in the nomadic community.
+
+I love living in a van. It's the best thing that I've ever done, but that's the only downside is it's just really difficult to date and meet new people. So this app would be a huge win for the nomadic community. And it's not for nothing because RevenueCat is actually giving away twenty thousand dollars to the best app that can recreate what I'm looking for.
+
+So good luck.
+---------------------------
+Simon
+Hi. It's Simon and this is Better Creating. So here's the app I wanna build, an AI coaching app. Coaching is one of the highest returns on investment that you can make with your time.
+
+The right guidance at the right moment can change everything. It's the one thing I don't think about spending money on. But most people, well, they never access it. They don't know how to find the right coach, don't have the time, and yet can't often afford it.
+
+As for AI agents, for many, they still feel too complicated, too technical, too much to set up. Now I've spent the last year building AI coaching systems in Notion that thousands of people use. Now I want to bring that to a standalone mobile app. Imagine a beautiful minimal app where users can download, create, and share AI coaches.
+
+An interface that demystifies what AI agents can do and just lets you start. Maybe there's a space to add your personal context and your values, then you just pick the coach, chat with it, and you get somewhere. My audience is obsessed with productivity, great design, and building systems. They're ready for this, and we'll champion your work with them at the end.
+
+And with vibe coding tools like VibeCode app, say that in a rush, Rawk and anything, building an AI app MVP has never been faster or easier. So whether you're a seasoned developer or getting started with these new AI app creation tools, this competition might just be for you. Build as an app, win twenty grand, maybe we could even ship it together.
+--------------------
+Rebecca Louise
+Rebecca Louise here. I have something very different and exciting to tell you this week. It's very in line with the questions that I get sent from lots of my followers. I've partnered with RevenueCat to launch competition for app developers so that they take an idea that I have and they use their creative and their technical skills to turn that idea into a fully functioning app.
+
+Anyone can apply for it whether you're a professional app developer or a wannabe app developer. Once everybody has built the app, I will choose a winner and that winner will win twenty thousand dollars So let's get to the idea itself. I recently put out a poll in my stories asking if I were to develop an app, what sort of information would they want to find on that app? A recurring request was financial advice.
+
+The three main topics that people seem to want to know about regarding the management of their money were number one the renovation of a home or a business property. Number two how to invest any money that they do have multiply it. Number three day to day living costs and how to keep those to a minimum and therefore have more money to reinvest. So if I can find someone to develop an app that is very simple, very easy, I think it would be one of the most popular apps on the market, particularly for stay at home moms who might want a little bit more financial independence.
+
+If this is you and you want to develop this app then check down below for how to apply.
+
+
+
