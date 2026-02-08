@@ -6,18 +6,33 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withRepeat,
+  withSequence,
+  Easing,
+} from 'react-native-reanimated';
 import { useCoaches } from '../../hooks/useCoaches';
 import { useChat } from '../../hooks/useChat';
 import { useSubscription } from '../../hooks/useSubscription';
+import { useNotion } from '../../hooks/useNotion';
 import ChatBubble from '../../components/ChatBubble';
 import ChatInput from '../../components/ChatInput';
-import { Message } from '../../types';
+import SessionSummaryCard from '../../components/SessionSummaryCard';
+import NotionPagePicker from '../../components/NotionPagePicker';
+import { AnimatedPressable, TypingDots } from '../../components/animated';
+import { Message, SessionSummary, NotionPage } from '../../types';
+import { generateSessionSummary } from '../../services/ai';
+import { exportSessionToNotion } from '../../services/notion';
+import { saveSession } from '../../services/storage';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY, SPACING } from '../../constants/typography';
 import { FREE_DAILY_LIMIT } from '../../constants/config';
@@ -30,10 +45,50 @@ export default function ChatScreen() {
   const router = useRouter();
   const { getCoachById } = useCoaches();
   const coach = getCoachById(coachId || '');
-  const { messages, isLoading, sendMessage, loadSession, startNewSession } = useChat(coach);
+  const { messages, isLoading, session, sendMessage, loadSession, startNewSession } = useChat(coach);
   const { subscription, trackMessage, canSendMessage } = useSubscription();
+  const { isConnected } = useNotion();
   const flatListRef = useRef<FlatList<Message>>(null);
   const [initialized, setInitialized] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [summary, setSummary] = useState<SessionSummary | null>(null);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [showPagePicker, setShowPagePicker] = useState(false);
+
+  // Menu dropdown animation
+  const menuScale = useSharedValue(0.85);
+  const menuOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    if (showMenu) {
+      menuScale.value = withTiming(1, { duration: 200, easing: Easing.out(Easing.cubic) });
+      menuOpacity.value = withTiming(1, { duration: 200 });
+    } else {
+      menuScale.value = 0.85;
+      menuOpacity.value = 0;
+    }
+  }, [showMenu]);
+
+  const menuAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: menuScale.value }],
+    opacity: menuOpacity.value,
+  }));
+
+  // Floating empty state icon
+  const floatY = useSharedValue(0);
+  useEffect(() => {
+    floatY.value = withRepeat(
+      withSequence(
+        withTiming(-6, { duration: 1500 }),
+        withTiming(6, { duration: 1500 }),
+      ),
+      -1,
+      true,
+    );
+  }, []);
+  const floatStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: floatY.value }],
+  }));
 
   useEffect(() => {
     if (coachId && !initialized) {
@@ -48,6 +103,13 @@ export default function ChatScreen() {
       handleSend(initialPrompt);
     }
   }, [initialized]);
+
+  // Restore summary from session
+  useEffect(() => {
+    if (session?.summary) {
+      setSummary(session.summary);
+    }
+  }, [session?.summary]);
 
   const handleSend = async (text: string) => {
     if (!canSendMessage()) {
@@ -65,7 +127,81 @@ export default function ChatScreen() {
   };
 
   const handleNewSession = () => {
+    setSummary(null);
     startNewSession();
+  };
+
+  const handleGenerateSummary = async () => {
+    if (messages.length < 2) {
+      Alert.alert('Not enough messages', 'Have a conversation first before generating a summary.');
+      return;
+    }
+
+    setShowMenu(false);
+    setIsGeneratingSummary(true);
+
+    try {
+      const raw = await generateSessionSummary(messages);
+      const cleaned = raw.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+      const sessionSummary: SessionSummary = {
+        ...parsed,
+        id: `summary_${Date.now()}`,
+        sessionId: session?.id,
+        coachId: coachId,
+        generatedAt: new Date().toISOString(),
+      };
+      setSummary(sessionSummary);
+
+      // Save to session
+      if (session) {
+        const updated = { ...session, summary: sessionSummary };
+        await saveSession(updated);
+      }
+    } catch (error) {
+      console.error('Summary generation error:', error);
+      Alert.alert('Error', 'Failed to generate summary. Try again.');
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
+  const handleExportToNotion = () => {
+    if (!isConnected) {
+      Alert.alert('Not Connected', 'Connect Notion in your profile first.');
+      return;
+    }
+    setShowMenu(false);
+    setShowPagePicker(true);
+  };
+
+  const handleExportPageSelected = async (page: NotionPage) => {
+    if (!summary || !coach) return;
+
+    try {
+      const result = await exportSessionToNotion(
+        summary,
+        { name: coach.name, icon: coach.icon },
+        page.id
+      );
+
+      const updatedSummary: SessionSummary = {
+        ...summary,
+        exportedToNotion: true,
+        notionPageId: result.pageId,
+        notionPageUrl: result.url,
+      };
+      setSummary(updatedSummary);
+
+      if (session) {
+        await saveSession({ ...session, summary: updatedSummary });
+      }
+
+      Alert.alert('Exported!', 'Session summary exported to Notion.');
+    } catch (error) {
+      console.error('Export error:', error);
+      Alert.alert('Export Failed', 'Could not export to Notion. Check your connection.');
+    }
   };
 
   const accentColor = coach?.color || COLORS.accent;
@@ -82,9 +218,9 @@ export default function ChatScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <AnimatedPressable onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-        </TouchableOpacity>
+        </AnimatedPressable>
         <View style={styles.headerInfo}>
           <Text style={styles.headerIcon}>{coach.icon}</Text>
           <View>
@@ -95,11 +231,41 @@ export default function ChatScreen() {
             </View>
           </View>
         </View>
-        <TouchableOpacity onPress={handleNewSession} style={styles.newButton}>
+        <AnimatedPressable onPress={handleNewSession} style={styles.newButton}>
           <Ionicons name="refresh" size={20} color={accentColor} />
           <Text style={[styles.newText, { color: accentColor }]}>New</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
+        <AnimatedPressable
+          onPress={() => setShowMenu(!showMenu)}
+          style={styles.menuButton}
+        >
+          <Ionicons name="ellipsis-vertical" size={20} color={COLORS.text} />
+        </AnimatedPressable>
       </View>
+
+      {showMenu && (
+        <Animated.View style={[styles.menuDropdown, menuAnimStyle]}>
+          <AnimatedPressable
+            style={styles.menuItem}
+            onPress={handleGenerateSummary}
+            disabled={isGeneratingSummary}
+          >
+            <Ionicons name="document-text-outline" size={18} color={COLORS.text} />
+            <Text style={styles.menuItemText}>
+              {isGeneratingSummary ? 'Generating...' : 'Generate Summary'}
+            </Text>
+          </AnimatedPressable>
+          {isConnected && summary && (
+            <AnimatedPressable
+              style={styles.menuItem}
+              onPress={handleExportToNotion}
+            >
+              <Text style={styles.menuNotionN}>N</Text>
+              <Text style={styles.menuItemText}>Export to Notion</Text>
+            </AnimatedPressable>
+          )}
+        </Animated.View>
+      )}
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -123,12 +289,24 @@ export default function ChatScreen() {
           }
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={styles.emptyIcon}>{coach.icon}</Text>
+              <Animated.View style={floatStyle}>
+                <Text style={styles.emptyIcon}>{coach.icon}</Text>
+              </Animated.View>
               <Text style={styles.emptyTitle}>Start a session with {coach.name}</Text>
               <Text style={styles.emptyDesc}>
                 Ask anything or tap one of the suggestions below
               </Text>
             </View>
+          }
+          ListHeaderComponent={
+            summary ? (
+              <SessionSummaryCard
+                summary={summary}
+                onExportToNotion={handleExportToNotion}
+                isNotionConnected={isConnected}
+                accentColor={accentColor}
+              />
+            ) : null
           }
           ListFooterComponent={
             isLoading ? (
@@ -137,7 +315,17 @@ export default function ChatScreen() {
                   <Text style={{ fontSize: 16 }}>{coach.icon}</Text>
                 </View>
                 <View style={styles.typingBubble}>
+                  <TypingDots color={accentColor} />
+                </View>
+              </View>
+            ) : isGeneratingSummary ? (
+              <View style={styles.typingContainer}>
+                <View style={styles.typingAvatar}>
+                  <Ionicons name="document-text" size={16} color={accentColor} />
+                </View>
+                <View style={styles.typingBubble}>
                   <ActivityIndicator size="small" color={accentColor} />
+                  <Text style={styles.generatingText}>Generating summary...</Text>
                 </View>
               </View>
             ) : null
@@ -167,6 +355,15 @@ export default function ChatScreen() {
           accentColor={accentColor}
         />
       </KeyboardAvoidingView>
+
+      <NotionPagePicker
+        visible={showPagePicker}
+        onClose={() => setShowPagePicker(false)}
+        onSelect={handleExportPageSelected}
+        filter="page"
+        title="Export Destination"
+        accentColor={accentColor}
+      />
     </SafeAreaView>
   );
 }
@@ -233,6 +430,47 @@ const styles = StyleSheet.create({
   newText: {
     ...TYPOGRAPHY.label,
   },
+  menuButton: {
+    padding: SPACING.xs,
+    marginLeft: 4,
+  },
+  menuDropdown: {
+    position: 'absolute',
+    top: 56,
+    right: SPACING.md,
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    zIndex: 100,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    minWidth: 200,
+    transformOrigin: 'top right',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  menuItemText: {
+    ...TYPOGRAPHY.body,
+    color: COLORS.text,
+  },
+  menuNotionN: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: COLORS.text,
+    width: 18,
+    textAlign: 'center',
+  },
   chatArea: {
     flex: 1,
   },
@@ -283,6 +521,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderWidth: 1,
     borderColor: COLORS.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  generatingText: {
+    ...TYPOGRAPHY.bodySmall,
+    color: COLORS.textSecondary,
   },
   counterBar: {
     paddingVertical: SPACING.xs,

@@ -1,48 +1,106 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withDelay,
+  withRepeat,
+  withSequence,
+} from 'react-native-reanimated';
 import Button from '../../components/Button';
+import { FadeInView, StaggerList } from '../../components/animated';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY, SPACING } from '../../constants/typography';
 
 export default function Welcome() {
   const router = useRouter();
 
+  // Logo animation
+  const logoScale = useSharedValue(0.5);
+  const logoOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    logoOpacity.value = withTiming(1, { duration: 400 });
+    logoScale.value = withSpring(1, { damping: 12, stiffness: 200 });
+  }, []);
+
+  const logoAnimStyle = useAnimatedStyle(() => ({
+    opacity: logoOpacity.value,
+    transform: [{ scale: logoScale.value }],
+  }));
+
+  // Button shadow pulse
+  const shadowOpacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    shadowOpacity.value = withDelay(
+      900,
+      withRepeat(
+        withSequence(
+          withTiming(0.5, { duration: 1500 }),
+          withTiming(0.3, { duration: 1500 }),
+        ),
+        -1,
+      ),
+    );
+  }, []);
+
+  const buttonGlowStyle = useAnimatedStyle(() => ({
+    shadowOpacity: shadowOpacity.value,
+  }));
+
   return (
     <LinearGradient colors={['#0A0A0F', '#064E3B']} style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.content}>
-          <View style={styles.logoContainer}>
+          <Animated.View style={[styles.logoContainer, logoAnimStyle]}>
             <View style={styles.logo}>
               <Text style={styles.logoText}>C</Text>
             </View>
-          </View>
+          </Animated.View>
 
-          <Text style={styles.title}>CoachKit</Text>
-          <Text style={styles.tagline}>
-            Your best life, simplified.{'\n'}Specialist AI agents powered by proven frameworks.
-          </Text>
+          <FadeInView delay={200} direction="up">
+            <Text style={styles.title}>CoachKit</Text>
+          </FadeInView>
+
+          <FadeInView delay={400} direction="up">
+            <Text style={styles.tagline}>
+              Your best life, simplified.{'\n'}Specialist AI agents powered by proven frameworks.
+            </Text>
+          </FadeInView>
 
           <View style={styles.pills}>
-            {['🎯 Focused coaching', '🤖 AI-powered agents', '🔗 Share with anyone'].map(pill => (
-              <View key={pill} style={styles.pill}>
-                <Text style={styles.pillText}>{pill}</Text>
-              </View>
-            ))}
+            <StaggerList baseDelay={600} staggerDelay={100}>
+              {['🎯 Focused coaching', '🤖 AI-powered agents', '🔗 Share with anyone'].map(pill => (
+                <View key={pill} style={styles.pill}>
+                  <Text style={styles.pillText}>{pill}</Text>
+                </View>
+              ))}
+            </StaggerList>
           </View>
         </View>
 
         <View style={styles.footer}>
-          <Button
-            title="Get Started"
-            onPress={() => router.push('/(onboarding)/intent')}
-            color={COLORS.accent}
-            style={{ width: '100%' }}
-          />
-          <Text style={styles.footerText}>
-            No account needed · Data stays on your device
-          </Text>
+          <FadeInView delay={900} direction="none">
+            <Animated.View style={[styles.buttonGlow, buttonGlowStyle]}>
+              <Button
+                title="Get Started"
+                onPress={() => router.push('/(onboarding)/intent')}
+                color={COLORS.accent}
+                style={{ width: '100%' }}
+              />
+            </Animated.View>
+          </FadeInView>
+          <FadeInView delay={1000} distance={10}>
+            <Text style={styles.footerText}>
+              No account needed · Data stays on your device
+            </Text>
+          </FadeInView>
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -86,6 +144,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 36,
     marginBottom: SPACING.sm,
+    textAlign: 'center',
   },
   tagline: {
     ...TYPOGRAPHY.body,
@@ -116,6 +175,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xl,
     paddingBottom: SPACING.lg,
     alignItems: 'center',
+  },
+  buttonGlow: {
+    width: '100%',
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 16,
+    elevation: 4,
   },
   footerText: {
     ...TYPOGRAPHY.bodySmall,

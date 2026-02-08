@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-  TouchableOpacity,
   Text,
   StyleSheet,
   ActivityIndicator,
   ViewStyle,
   TextStyle,
 } from 'react-native';
+import { AnimatedPressable } from './animated';
 import { COLORS } from '../constants/colors';
 import { TYPOGRAPHY, RADIUS } from '../constants/typography';
 
@@ -58,26 +58,23 @@ export default function Button({
     textStyles.push({ color: accentColor });
   }
 
-  if (disabled || loading) {
-    buttonStyles.push({ opacity: 0.5 });
-  }
-
   if (style) buttonStyles.push(style);
   if (textStyle) textStyles.push(textStyle);
 
   return (
-    <TouchableOpacity
-      style={buttonStyles}
+    <AnimatedPressable
       onPress={onPress}
+      style={buttonStyles}
       disabled={disabled || loading}
-      activeOpacity={0.8}
+      scaleAmount={0.96}
+      haptic={variant === 'primary'}
     >
       {loading ? (
         <ActivityIndicator color={variant === 'primary' ? '#FFF' : accentColor} />
       ) : (
         <Text style={textStyles}>{title}</Text>
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 

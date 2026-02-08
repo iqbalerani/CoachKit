@@ -1,11 +1,17 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import Button from '../../components/Button';
 import { useUser } from '../../hooks/useUser';
 import { UserContext } from '../../types';
+import { AnimatedPressable, AnimatedProgressBar, StaggerList } from '../../components/animated';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY, SPACING, RADIUS } from '../../constants/typography';
 
@@ -31,6 +37,21 @@ const styleOptions: { style: CoachingStyle; icon: string; title: string; desc: s
     desc: 'Straight to it. No fluff. Challenges assumptions.',
   },
 ];
+
+function RadioDot({ selected }: { selected: boolean }) {
+  const scale = useSharedValue(selected ? 1 : 0);
+  scale.value = withSpring(selected ? 1 : 0, { damping: 15, stiffness: 300 });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <View style={styles.radio}>
+      <Animated.View style={[styles.radioInner, animatedStyle]} />
+    </View>
+  );
+}
 
 export default function Style() {
   const router = useRouter();
@@ -69,8 +90,8 @@ export default function Style() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.progressBar}>
-        <View style={[styles.progressFill, { width: '100%' }]} />
+      <View style={styles.progressContainer}>
+        <AnimatedProgressBar progress={1.0} />
       </View>
 
       <View style={styles.content}>
@@ -78,31 +99,31 @@ export default function Style() {
         <Text style={styles.subtitle}>How do you prefer to be coached?</Text>
 
         <View style={styles.options}>
-          {styleOptions.map(opt => (
-            <TouchableOpacity
-              key={opt.style}
-              style={[
-                styles.optionCard,
-                selected === opt.style && styles.optionCardSelected,
-              ]}
-              onPress={() => setSelected(opt.style)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.optionHeader}>
-                <Text style={styles.optionIcon}>{opt.icon}</Text>
-                <Text style={styles.optionTitle}>{opt.title}</Text>
-                {opt.style === 'balanced' && (
-                  <View style={styles.defaultBadge}>
-                    <Text style={styles.defaultBadgeText}>DEFAULT</Text>
-                  </View>
-                )}
-              </View>
-              <Text style={styles.optionDesc}>{opt.desc}</Text>
-              <View style={styles.radio}>
-                {selected === opt.style && <View style={styles.radioInner} />}
-              </View>
-            </TouchableOpacity>
-          ))}
+          <StaggerList baseDelay={200} staggerDelay={80}>
+            {styleOptions.map(opt => (
+              <AnimatedPressable
+                key={opt.style}
+                style={[
+                  styles.optionCard,
+                  selected === opt.style && styles.optionCardSelected,
+                ]}
+                onPress={() => setSelected(opt.style)}
+                scaleAmount={0.98}
+              >
+                <View style={styles.optionHeader}>
+                  <Text style={styles.optionIcon}>{opt.icon}</Text>
+                  <Text style={styles.optionTitle}>{opt.title}</Text>
+                  {opt.style === 'balanced' && (
+                    <View style={styles.defaultBadge}>
+                      <Text style={styles.defaultBadgeText}>DEFAULT</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.optionDesc}>{opt.desc}</Text>
+                <RadioDot selected={selected === opt.style} />
+              </AnimatedPressable>
+            ))}
+          </StaggerList>
         </View>
       </View>
 
@@ -122,17 +143,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.bg,
   },
-  progressBar: {
-    height: 4,
-    backgroundColor: COLORS.border,
+  progressContainer: {
     marginHorizontal: SPACING.xl,
     marginTop: SPACING.md,
-    borderRadius: 2,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: COLORS.accent,
-    borderRadius: 2,
   },
   content: {
     flex: 1,

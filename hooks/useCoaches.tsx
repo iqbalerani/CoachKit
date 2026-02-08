@@ -1,9 +1,29 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Coach } from '../types';
 import { BUILT_IN_COACHES } from '../constants/coaches';
 import { getCustomCoaches, saveCustomCoach, deleteCustomCoach as deleteCoachStorage } from '../services/storage';
 
-export function useCoaches() {
+interface CoachState {
+  allCoaches: Coach[];
+  builtInCoaches: Coach[];
+  customCoaches: Coach[];
+  isLoading: boolean;
+  addCoach: (coach: Coach) => Promise<void>;
+  deleteCoach: (coachId: string) => Promise<void>;
+  getCoachById: (id: string) => Coach | undefined;
+}
+
+const CoachCtx = createContext<CoachState>({
+  allCoaches: [],
+  builtInCoaches: BUILT_IN_COACHES,
+  customCoaches: [],
+  isLoading: true,
+  addCoach: async () => {},
+  deleteCoach: async () => {},
+  getCoachById: () => undefined,
+});
+
+export function CoachProvider({ children }: { children: React.ReactNode }) {
   const [customCoaches, setCustomCoaches] = useState<Coach[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -31,13 +51,21 @@ export function useCoaches() {
       || customCoaches.find(c => c.id === id);
   }, [customCoaches]);
 
-  return {
-    allCoaches,
-    builtInCoaches: BUILT_IN_COACHES,
-    customCoaches,
-    isLoading,
-    addCoach,
-    deleteCoach,
-    getCoachById,
-  };
+  return (
+    <CoachCtx.Provider value={{
+      allCoaches,
+      builtInCoaches: BUILT_IN_COACHES,
+      customCoaches,
+      isLoading,
+      addCoach,
+      deleteCoach,
+      getCoachById,
+    }}>
+      {children}
+    </CoachCtx.Provider>
+  );
+}
+
+export function useCoaches() {
+  return useContext(CoachCtx);
 }

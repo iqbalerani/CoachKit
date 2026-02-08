@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import { AnimatedPressable } from './animated';
 import { COLORS } from '../constants/colors';
 import { RADIUS, SPACING } from '../constants/typography';
 
@@ -18,9 +19,9 @@ export default function Card({ children, style, onPress }: CardProps) {
 
   if (onPress) {
     return (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+      <AnimatedPressable onPress={onPress} scaleAmount={0.98}>
         {content}
-      </TouchableOpacity>
+      </AnimatedPressable>
     );
   }
 

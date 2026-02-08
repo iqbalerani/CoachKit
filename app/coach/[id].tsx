@@ -1,20 +1,84 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Alert, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+} from 'react-native-reanimated';
 import { useCoaches } from '../../hooks/useCoaches';
+import { useNotion } from '../../hooks/useNotion';
+import { useEnrollments } from '../../hooks/useEnrollments';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
+import NotionPagePicker from '../../components/NotionPagePicker';
+import { AnimatedPressable, FadeInView, StaggerList } from '../../components/animated';
+import { NotionPage } from '../../types';
+import { exportCoachToNotion } from '../../services/notion';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY, SPACING, RADIUS } from '../../constants/typography';
 
 export default function CoachDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { getCoachById } = useCoaches();
+  const { getCoachById, deleteCoach } = useCoaches();
+  const { isConnected } = useNotion();
+  const { isEnrolled, enroll, unenroll } = useEnrollments();
+  const [showExportPicker, setShowExportPicker] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const coach = getCoachById(id || '');
+  const enrolled = coach ? isEnrolled(coach.id) : false;
+
+  // Hero icon spring
+  const heroScale = useSharedValue(0.8);
+  useEffect(() => {
+    heroScale.value = withSpring(1, { damping: 12, stiffness: 200 });
+  }, []);
+  const heroStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: heroScale.value }],
+  }));
+
+  // Enroll bounce
+  const enrollScale = useSharedValue(1);
+  useEffect(() => {
+    enrollScale.value = withSequence(
+      withSpring(1.05, { damping: 10, stiffness: 300 }),
+      withSpring(1.0, { damping: 12, stiffness: 200 }),
+    );
+  }, [enrolled]);
+  const enrollStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: enrollScale.value }],
+  }));
+
+  const handleExportToNotion = async (page: NotionPage) => {
+    if (!coach) return;
+    setIsExporting(true);
+    try {
+      const result = await exportCoachToNotion(coach, page.id);
+      Alert.alert(
+        'Exported!',
+        `${coach.name} has been exported to Notion.`,
+        [
+          { text: 'OK' },
+          {
+            text: 'Open in Notion',
+            onPress: () => {
+              if (result.url) Linking.openURL(result.url);
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Coach export error:', error);
+      Alert.alert('Export Failed', 'Could not export to Notion. Check your connection.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   if (!coach) {
     return (
@@ -27,49 +91,71 @@ export default function CoachDetail() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={[coach.color + 'DD', coach.color]}
-        style={styles.hero}
-      >
+      {/* Flat hero */}
+      <View style={styles.hero}>
         <SafeAreaView edges={['top']}>
           <View style={styles.heroHeader}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
+            <AnimatedPressable onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+            </AnimatedPressable>
+            {coach.isCustom && (
+              <AnimatedPressable
+                onPress={() => {
+                  Alert.alert(
+                    'Delete Agent',
+                    `Are you sure you want to delete "${coach.name}"? This cannot be undone.`,
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Delete',
+                        style: 'destructive',
+                        onPress: () => {
+                          deleteCoach(coach.id);
+                          router.back();
+                        },
+                      },
+                    ],
+                  );
+                }}
+                style={styles.deleteButton}
+              >
+                <Ionicons name="trash-outline" size={22} color={COLORS.error} />
+              </AnimatedPressable>
+            )}
           </View>
           <View style={styles.heroContent}>
             <View style={styles.iconContainer}>
-              <View style={styles.iconRing}>
-                <Text style={styles.icon}>{coach.icon}</Text>
-              </View>
+              <Animated.View style={heroStyle}>
+                <View style={[styles.iconRing, { backgroundColor: coach.color + '15', borderColor: coach.color + '30' }]}>
+                  <Text style={styles.icon}>{coach.icon}</Text>
+                </View>
+              </Animated.View>
             </View>
-            <Text style={styles.name}>{coach.name}</Text>
-            <View style={styles.agentBadge}>
-              <Text style={styles.agentBadgeText}>Specialist Agent</Text>
-            </View>
-            <Text style={styles.tagline}>{coach.tagline}</Text>
-            <View style={styles.statsRow}>
-              <View style={styles.stat}>
-                <Text style={styles.statValue}>{coach.sessions || 0}</Text>
-                <Text style={styles.statLabel}>Sessions</Text>
+            <FadeInView delay={200} direction="up">
+              <Text style={styles.name}>{coach.name}</Text>
+            </FadeInView>
+            <FadeInView delay={300} direction="up">
+              <View style={[styles.categoryBadge, { backgroundColor: coach.color + '15' }]}>
+                <Text style={[styles.categoryBadgeText, { color: coach.color }]}>{coach.category}</Text>
               </View>
-              <View style={styles.stat}>
-                <Text style={styles.statValue}>{coach.category}</Text>
-                <Text style={styles.statLabel}>Category</Text>
-              </View>
-            </View>
+            </FadeInView>
+            <FadeInView delay={400} direction="up">
+              <Text style={styles.tagline}>{coach.tagline}</Text>
+            </FadeInView>
           </View>
         </SafeAreaView>
-      </LinearGradient>
+      </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>
-        <Text style={styles.sectionTitle}>About</Text>
-        <Card style={{ marginBottom: SPACING.lg }}>
-          <Text style={styles.aboutText}>{coach.description}</Text>
-        </Card>
+        <FadeInView direction="up" delay={500}>
+          <Text style={styles.sectionTitle}>About</Text>
+          <Card style={{ marginBottom: SPACING.lg }}>
+            <Text style={styles.aboutText}>{coach.description}</Text>
+          </Card>
+        </FadeInView>
 
         {coach.methodology && coach.methodology.length > 0 && (
-          <>
+          <FadeInView direction="up" delay={500}>
             <Text style={styles.sectionTitle}>Frameworks</Text>
             <View style={styles.methodologyRow}>
               {coach.methodology.map((m, i) => (
@@ -78,44 +164,82 @@ export default function CoachDetail() {
                 </View>
               ))}
             </View>
-          </>
+          </FadeInView>
         )}
 
         {coach.examplePrompts.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Try asking</Text>
-            {coach.examplePrompts.map((prompt, i) => (
-              <TouchableOpacity
-                key={i}
-                style={styles.promptCard}
-                onPress={() =>
-                  router.push({
-                    pathname: '/coach/chat',
-                    params: { coachId: coach.id, initialPrompt: prompt },
-                  })
-                }
-                activeOpacity={0.7}
-              >
-                <Text style={styles.promptText}>{prompt}</Text>
-                <Ionicons name="arrow-forward" size={16} color={coach.color} />
-              </TouchableOpacity>
-            ))}
+            <StaggerList baseDelay={600} staggerDelay={80}>
+              {coach.examplePrompts.map((prompt, i) => (
+                <AnimatedPressable
+                  key={i}
+                  style={styles.promptCard}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/coach/chat',
+                      params: { coachId: coach.id, initialPrompt: prompt },
+                    })
+                  }
+                  scaleAmount={0.98}
+                >
+                  <Text style={styles.promptText}>{prompt}</Text>
+                  <Ionicons name="arrow-forward" size={16} color={coach.color} />
+                </AnimatedPressable>
+              ))}
+            </StaggerList>
+          </>
+        )}
+
+        {coach.isCustom && isConnected && (
+          <>
+            <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>Notion</Text>
+            <AnimatedPressable
+              style={[styles.exportNotionButton, { borderColor: coach.color + '40' }]}
+              onPress={() => setShowExportPicker(true)}
+              disabled={isExporting}
+              scaleAmount={0.98}
+            >
+              <Text style={styles.exportNotionN}>N</Text>
+              <Text style={[styles.exportNotionText, { color: coach.color }]}>
+                {isExporting ? 'Exporting...' : 'Export to Notion'}
+              </Text>
+            </AnimatedPressable>
           </>
         )}
       </ScrollView>
 
+      {/* Footer with Enroll + Start Session */}
       <View style={styles.footer}>
         <SafeAreaView edges={['bottom']}>
-          <Button
-            title={`Start Session with ${coach.name}`}
-            onPress={() =>
-              router.push({ pathname: '/coach/chat', params: { coachId: coach.id } })
-            }
-            color={coach.color}
-            style={{ width: '100%' }}
-          />
+          <Animated.View style={[styles.footerButtons, enrollStyle]}>
+            <Button
+              title={enrolled ? 'Unenroll' : 'Enroll'}
+              onPress={() => enrolled ? unenroll(coach.id) : enroll(coach.id)}
+              variant="outline"
+              color={enrolled ? COLORS.textMuted : coach.color}
+              style={{ flex: 1 }}
+            />
+            <Button
+              title="Start Session"
+              onPress={() =>
+                router.push({ pathname: '/coach/chat', params: { coachId: coach.id } })
+              }
+              color={coach.color}
+              style={{ flex: 2 }}
+            />
+          </Animated.View>
         </SafeAreaView>
       </View>
+
+      <NotionPagePicker
+        visible={showExportPicker}
+        onClose={() => setShowExportPicker(false)}
+        onSelect={handleExportToNotion}
+        filter="page"
+        title="Export Destination"
+        accentColor={coach.color}
+      />
     </View>
   );
 }
@@ -137,9 +261,15 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   hero: {
+    backgroundColor: COLORS.headerBg,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.headerBorder,
     paddingBottom: SPACING.xl,
   },
   heroHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: SPACING.md,
     paddingTop: SPACING.sm,
   },
@@ -147,7 +277,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -162,9 +300,7 @@ const styles = StyleSheet.create({
     width: 88,
     height: 88,
     borderRadius: 44,
-    backgroundColor: 'rgba(255,255,255,0.15)',
     borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -173,51 +309,31 @@ const styles = StyleSheet.create({
   },
   name: {
     ...TYPOGRAPHY.h1,
-    color: '#FFFFFF',
+    color: COLORS.text,
     marginBottom: SPACING.xs,
+    textAlign: 'center',
   },
-  agentBadge: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+  categoryBadge: {
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
     marginBottom: SPACING.xs,
   },
-  agentBadgeText: {
+  categoryBadgeText: {
     ...TYPOGRAPHY.caption,
-    color: 'rgba(255,255,255,0.8)',
     fontWeight: '600',
   },
   tagline: {
     ...TYPOGRAPHY.body,
-    color: 'rgba(255,255,255,0.8)',
-    marginBottom: SPACING.lg,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: SPACING.xxl,
-  },
-  stat: {
-    alignItems: 'center',
-  },
-  statValue: {
-    ...TYPOGRAPHY.h3,
-    color: '#FFFFFF',
-  },
-  statLabel: {
-    ...TYPOGRAPHY.caption,
-    color: 'rgba(255,255,255,0.6)',
-    marginTop: 2,
-    textTransform: 'uppercase',
+    color: COLORS.textSecondary,
+    textAlign: 'center',
   },
   content: {
     flex: 1,
   },
   contentInner: {
     padding: SPACING.xl,
-    paddingBottom: 100,
+    paddingBottom: 120,
   },
   sectionTitle: {
     ...TYPOGRAPHY.h3,
@@ -260,6 +376,24 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: SPACING.sm,
   },
+  exportNotionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    backgroundColor: COLORS.card,
+  },
+  exportNotionN: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: COLORS.text,
+  },
+  exportNotionText: {
+    ...TYPOGRAPHY.label,
+  },
   footer: {
     position: 'absolute',
     bottom: 0,
@@ -270,5 +404,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
+  },
+  footerButtons: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
   },
 });

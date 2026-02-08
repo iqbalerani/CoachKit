@@ -14,7 +14,7 @@ export const COLORS = {
   accentLight: 'rgba(16, 185, 129, 0.12)',
   accentDark: '#059669',
 
-  // Purple (Builder/Creator)
+  // Purple (Builder/Creator) — @deprecated use accent/accentLight instead
   purple: '#8B5CF6',
   purpleLight: 'rgba(139, 92, 246, 0.12)',
 
@@ -26,7 +26,8 @@ export const COLORS = {
   // Other
   border: 'rgba(255, 255, 255, 0.08)',
 
-  // Gradients (use with LinearGradient)
-  seekerGradient: ['#064E3B', '#10B981'] as const,
-  builderGradient: ['#4C1D95', '#8B5CF6'] as const,
+  // Flat header tokens
+  headerBg: '#12121A',
+  headerBorder: 'rgba(255, 255, 255, 0.06)',
+  quoteCardBg: '#1A1A24',
 };

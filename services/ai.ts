@@ -73,9 +73,14 @@ export async function generateSessionSummary(
   const prompt = `Based on this coaching conversation, generate a session summary with exactly this JSON structure:
 
 {
+  "title": "A short descriptive title for this session (5-10 words)",
   "summary": "A 3-sentence summary of what was discussed and any decisions or realizations made.",
   "actionItems": ["Specific action 1", "Specific action 2", "Specific action 3"],
-  "keyInsight": "The single most important insight or reframe from this session."
+  "keyInsight": "The single most important insight or reframe from this session.",
+  "keyInsights": ["Insight 1", "Insight 2", "Insight 3"],
+  "frameworks": ["Any coaching frameworks or mental models referenced"],
+  "tags": ["topic1", "topic2"],
+  "followUp": "A suggested follow-up question or action for the next session."
 }
 
 Conversation:
@@ -84,5 +89,41 @@ ${conversation}
 Respond ONLY with the JSON object, no other text.`;
 
   const result = await model.generateContent(prompt);
+  return result.response.text();
+}
+
+export async function generateMotivationalQuote(
+  user: UserContext,
+  enrolledCoaches: Coach[]
+): Promise<string> {
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+  const coachContext = enrolledCoaches.length > 0
+    ? `They are currently working with these coaches: ${enrolledCoaches.map(c => `${c.name} (${c.category})`).join(', ')}.`
+    : 'They haven\'t enrolled in any coaches yet.';
+
+  const prompt = `Generate a short, personalized motivational quote (1-2 sentences) for someone with this context:
+- Name: ${user.name}
+- Currently focused on: ${user.currentFocus}
+- Biggest goal: ${user.biggestGoal}
+${user.role ? `- Role: ${user.role}` : ''}
+${coachContext}
+
+The quote should feel personal and relevant to their situation. Do NOT use generic platitudes. Do NOT include quotation marks or attribution. Just return the quote text.`;
+
+  const result = await model.generateContent(prompt);
+  return result.response.text().trim();
+}
+
+export async function parseWithAI(
+  systemInstruction: string,
+  userPrompt: string
+): Promise<string> {
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+    systemInstruction,
+  });
+
+  const result = await model.generateContent(userPrompt);
   return result.response.text();
 }

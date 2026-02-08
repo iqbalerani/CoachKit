@@ -1,29 +1,29 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCoaches } from '../../hooks/useCoaches';
 import CoachLibrary from '../../components/CoachLibrary';
+import BrandHeader from '../../components/BrandHeader';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY, SPACING } from '../../constants/typography';
 
 export default function BuilderLibrary() {
   const router = useRouter();
-  const { builtInCoaches, customCoaches } = useCoaches();
+  const { builtInCoaches, customCoaches, deleteCoach } = useCoaches();
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Library</Text>
-      </View>
+    <View style={styles.container}>
+      <BrandHeader />
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: SPACING.xl, gap: SPACING.sm }}>
+        <Text style={styles.title}>Library</Text>
         <CoachLibrary
           builtInCoaches={builtInCoaches}
           customCoaches={customCoaches}
-          accentColor={COLORS.purple}
+          accentColor={COLORS.accent}
           onCoachPress={(coach) => router.push(`/coach/${coach.id}`)}
+          onDeleteCoach={deleteCoach}
         />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -32,13 +32,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.bg,
   },
-  header: {
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
-  },
   title: {
-    ...TYPOGRAPHY.h1,
+    ...TYPOGRAPHY.h2,
     color: COLORS.text,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.md,
   },
   content: {
     flex: 1,

@@ -5,8 +5,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useCoaches } from '../../hooks/useCoaches';
 import { useUser } from '../../hooks/useUser';
+import { useNotion } from '../../hooks/useNotion';
 import Button from '../../components/Button';
-import { Coach } from '../../types';
+import NotionPagePicker from '../../components/NotionPagePicker';
+import ParsedCoachReview from '../../components/ParsedCoachReview';
+import { Coach, NotionPage } from '../../types';
+import { readNotionPage, parseNotionCoachInstructions } from '../../services/notion';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY, SPACING, RADIUS } from '../../constants/typography';
 
@@ -25,7 +29,12 @@ export default function CreateCoach() {
   const router = useRouter();
   const { addCoach } = useCoaches();
   const { user } = useUser();
+  const { isConnected } = useNotion();
   const [step, setStep] = useState(0);
+  const [showNotionPicker, setShowNotionPicker] = useState(false);
+  const [showCoachReview, setShowCoachReview] = useState(false);
+  const [parsedCoach, setParsedCoach] = useState<Partial<Coach> | null>(null);
+  const [isParsingCoach, setIsParsingCoach] = useState(false);
   const [icon, setIcon] = useState('🎯');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -37,6 +46,49 @@ export default function CreateCoach() {
 
   const canProceedStep0 = name.trim().length > 0;
   const canProceedStep1 = instructions.trim().length > 0;
+
+  const handleImportFromNotion = () => {
+    if (!isConnected) {
+      Alert.alert('Not Connected', 'Connect Notion in your profile first.');
+      return;
+    }
+    setShowNotionPicker(true);
+  };
+
+  const handleNotionPageSelected = async (page: NotionPage) => {
+    setShowNotionPicker(false);
+    setIsParsingCoach(true);
+    setShowCoachReview(true);
+
+    try {
+      const content = await readNotionPage(page.id);
+      const parsed = await parseNotionCoachInstructions(content);
+      setParsedCoach({
+        ...parsed,
+        notionSourcePageId: page.id,
+      });
+    } catch (error) {
+      console.error('Coach import error:', error);
+      Alert.alert('Import Failed', 'Could not parse the Notion page. Try a different page.');
+      setShowCoachReview(false);
+    } finally {
+      setIsParsingCoach(false);
+    }
+  };
+
+  const handleCoachImported = (coachData: Partial<Coach>) => {
+    // Pre-fill the form with imported data
+    if (coachData.name) setName(coachData.name);
+    if (coachData.description) setDescription(coachData.description);
+    if (coachData.systemPrompt) setInstructions(coachData.systemPrompt);
+    if (coachData.examplePrompts?.length) {
+      if (coachData.examplePrompts[0]) setExamplePrompt1(coachData.examplePrompts[0]);
+      if (coachData.examplePrompts[1]) setExamplePrompt2(coachData.examplePrompts[1]);
+      if (coachData.examplePrompts[2]) setExamplePrompt3(coachData.examplePrompts[2]);
+    }
+    // Move to step 1 (personality) since identity is filled
+    if (coachData.name) setStep(1);
+  };
 
   const handleCreate = async () => {
     if (!name.trim() || !instructions.trim()) {
@@ -55,7 +107,7 @@ export default function CreateCoach() {
       description: description.trim() || `Custom agent by ${user?.name || 'you'}`,
       tagline: description.trim() || name.trim(),
       category: 'Custom',
-      color: COLORS.purple,
+      color: COLORS.accent,
       systemPrompt: instructions.trim(),
       examplePrompts,
       isCustom: true,
@@ -88,7 +140,7 @@ export default function CreateCoach() {
 
   const renderPreviewCard = () => (
     <View style={styles.previewCard}>
-      <View style={[styles.previewIcon, { backgroundColor: COLORS.purple + '15', borderColor: COLORS.purple + '30' }]}>
+      <View style={[styles.previewIcon, { backgroundColor: COLORS.accent + '15', borderColor: COLORS.accent + '30' }]}>
         <Text style={styles.previewIconText}>{icon}</Text>
       </View>
       <View style={styles.previewInfo}>
@@ -106,6 +158,20 @@ export default function CreateCoach() {
     <>
       <Text style={styles.stepTitle}>Identity</Text>
       <Text style={styles.stepDesc}>Give your agent a name and icon</Text>
+
+      {isConnected && (
+        <TouchableOpacity
+          style={styles.notionImportButton}
+          onPress={handleImportFromNotion}
+        >
+          <Text style={styles.notionN}>N</Text>
+          <View style={styles.notionImportInfo}>
+            <Text style={styles.notionImportTitle}>Import from Notion</Text>
+            <Text style={styles.notionImportDesc}>Pull an agent profile from a Notion page</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+        </TouchableOpacity>
+      )}
 
       {renderPreviewCard()}
 
@@ -221,7 +287,7 @@ export default function CreateCoach() {
       <Text style={styles.stepDesc}>Everything look good?</Text>
 
       <View style={styles.reviewCard}>
-        <View style={[styles.reviewIconContainer, { backgroundColor: COLORS.purple + '15' }]}>
+        <View style={[styles.reviewIconContainer, { backgroundColor: COLORS.accent + '15' }]}>
           <Text style={styles.reviewIcon}>{icon}</Text>
         </View>
         <Text style={styles.reviewName}>{name}</Text>
@@ -252,8 +318,8 @@ export default function CreateCoach() {
         <Switch
           value={shareEnabled}
           onValueChange={setShareEnabled}
-          trackColor={{ false: COLORS.border, true: COLORS.purple + '60' }}
-          thumbColor={shareEnabled ? COLORS.purple : COLORS.textMuted}
+          trackColor={{ false: COLORS.border, true: COLORS.accent + '60' }}
+          thumbColor={shareEnabled ? COLORS.accent : COLORS.textMuted}
         />
       </View>
     </>
@@ -289,7 +355,7 @@ export default function CreateCoach() {
           <Button
             title="Next"
             onPress={() => setStep(step + 1)}
-            color={COLORS.purple}
+            color={COLORS.accent}
             disabled={step === 0 ? !canProceedStep0 : !canProceedStep1}
             style={{ width: '100%' }}
           />
@@ -297,11 +363,29 @@ export default function CreateCoach() {
           <Button
             title="Create Agent"
             onPress={handleCreate}
-            color={COLORS.purple}
+            color={COLORS.accent}
             style={{ width: '100%' }}
           />
         )}
       </View>
+
+      <NotionPagePicker
+        visible={showNotionPicker}
+        onClose={() => setShowNotionPicker(false)}
+        onSelect={handleNotionPageSelected}
+        filter="page"
+        title="Select Agent Page"
+        accentColor={COLORS.accent}
+      />
+
+      <ParsedCoachReview
+        visible={showCoachReview}
+        onClose={() => setShowCoachReview(false)}
+        onImport={handleCoachImported}
+        parsedCoach={parsedCoach}
+        isLoading={isParsingCoach}
+        accentColor={COLORS.accent}
+      />
     </SafeAreaView>
   );
 }
@@ -341,11 +425,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
   stepDotActive: {
-    backgroundColor: COLORS.purple + '60',
+    backgroundColor: COLORS.accent + '60',
     width: 24,
   },
   stepDotCompleted: {
-    backgroundColor: COLORS.purple,
+    backgroundColor: COLORS.accent,
     width: 8,
   },
   content: {
@@ -435,8 +519,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emojiOptionSelected: {
-    borderColor: COLORS.purple,
-    backgroundColor: COLORS.purpleLight,
+    borderColor: COLORS.accent,
+    backgroundColor: COLORS.accentLight,
   },
   emojiText: {
     fontSize: 22,
@@ -472,14 +556,14 @@ const styles = StyleSheet.create({
   templatePill: {
     backgroundColor: COLORS.card,
     borderWidth: 1,
-    borderColor: COLORS.purple + '30',
+    borderColor: COLORS.accent + '30',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: RADIUS.full,
   },
   templateText: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.purple,
+    color: COLORS.accent,
     fontSize: 12,
   },
   reviewCard: {
@@ -553,6 +637,37 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   shareDesc: {
+    ...TYPOGRAPHY.bodySmall,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  notionImportButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.accent + '30',
+    marginBottom: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  notionN: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: COLORS.text,
+    width: 32,
+    textAlign: 'center',
+  },
+  notionImportInfo: {
+    flex: 1,
+  },
+  notionImportTitle: {
+    ...TYPOGRAPHY.label,
+    color: COLORS.accent,
+    fontSize: 14,
+  },
+  notionImportDesc: {
     ...TYPOGRAPHY.bodySmall,
     color: COLORS.textSecondary,
     marginTop: 2,

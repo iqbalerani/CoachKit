@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { AnimatedTabIcon } from '../../components/animated';
 import { COLORS } from '../../constants/colors';
 
 export default function BuilderLayout() {
@@ -7,7 +7,7 @@ export default function BuilderLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: COLORS.purple,
+        tabBarActiveTintColor: COLORS.accent,
         tabBarInactiveTintColor: COLORS.textMuted,
         tabBarStyle: {
           backgroundColor: COLORS.card,
@@ -25,8 +25,8 @@ export default function BuilderLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedTabIcon name="home-outline" size={size} color={color} focused={focused} />
           ),
         }}
       />
@@ -34,27 +34,39 @@ export default function BuilderLayout() {
         name="library"
         options={{
           title: 'Library',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedTabIcon name="compass-outline" size={size} color={color} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="enrollments"
+        options={{
+          title: 'My Coaches',
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedTabIcon name="people-outline" size={size} color={color} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="notion"
+        options={{
+          title: 'Notion',
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedTabIcon name="book-outline" size={size} color={color} focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
         name="create"
         options={{
-          title: 'Create',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle" size={size} color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
+          href: null,
         }}
       />
     </Tabs>

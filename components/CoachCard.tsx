@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Coach } from '../types';
+import { AnimatedPressable } from './animated';
 import { COLORS } from '../constants/colors';
 import { TYPOGRAPHY, RADIUS, SPACING } from '../constants/typography';
 
@@ -11,7 +12,7 @@ interface CoachCardProps {
 
 export default function CoachCard({ coach, onPress }: CoachCardProps) {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+    <AnimatedPressable style={styles.card} onPress={onPress} scaleAmount={0.98}>
       <View style={[styles.iconCircle, { backgroundColor: coach.color + '15', borderColor: coach.color + '30' }]}>
         <Text style={styles.icon}>{coach.icon}</Text>
       </View>
@@ -22,7 +23,7 @@ export default function CoachCard({ coach, onPress }: CoachCardProps) {
         </Text>
       </View>
       <Text style={styles.chevron}>›</Text>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 

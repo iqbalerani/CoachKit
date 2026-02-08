@@ -89,7 +89,7 @@ export default function CreatorPaywall() {
         <Button
           title="Start 7-Day Free Trial"
           onPress={handlePurchase}
-          color={COLORS.purple}
+          color={COLORS.accent}
           style={{ width: '100%' }}
         />
         <Text style={styles.footerText}>
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: COLORS.purple,
+    backgroundColor: COLORS.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   creatorBadge: {
-    backgroundColor: COLORS.purple,
+    backgroundColor: COLORS.accent,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 6,
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     width: 28,
     textAlign: 'center',
-    color: COLORS.purple,
+    color: COLORS.accent,
     fontWeight: '700',
   },
   featureLabel: {
@@ -205,16 +205,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   planCardSelected: {
-    borderColor: COLORS.purple,
-    backgroundColor: COLORS.purpleLight,
-    shadowColor: COLORS.purple,
+    borderColor: COLORS.accent,
+    backgroundColor: COLORS.accentLight,
+    shadowColor: COLORS.accent,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 4,
   },
   bestValue: {
-    backgroundColor: COLORS.purple,
+    backgroundColor: COLORS.accent,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   restoreLink: {
-    color: COLORS.purple,
+    color: COLORS.accent,
     fontWeight: '600',
   },
 });

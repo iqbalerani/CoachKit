@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TextInput, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { AnimatedPressable } from './animated';
 import { COLORS } from '../constants/colors';
 import { TYPOGRAPHY, RADIUS, SPACING } from '../constants/typography';
 
@@ -39,18 +40,19 @@ export default function ChatInput({
         maxLength={2000}
         editable={!disabled}
       />
-      <TouchableOpacity
+      <AnimatedPressable
         style={[styles.sendButton, { backgroundColor: accentColor }]}
         onPress={handleSend}
         disabled={!text.trim() || disabled}
-        activeOpacity={0.7}
+        scaleAmount={0.85}
+        haptic
       >
         <Ionicons
           name="arrow-up"
           size={20}
           color="#FFF"
         />
-      </TouchableOpacity>
+      </AnimatedPressable>
     </View>
   );
 }

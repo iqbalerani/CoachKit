@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { AnimatedTabIcon } from '../../components/animated';
 import { COLORS } from '../../constants/colors';
 
 export default function SeekerLayout() {
@@ -25,27 +25,42 @@ export default function SeekerLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedTabIcon name="home-outline" size={size} color={color} focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
         name="coaches"
         options={{
-          title: 'Coaches',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
+          title: 'Library',
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedTabIcon name="compass-outline" size={size} color={color} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="enrollments"
+        options={{
+          title: 'My Coaches',
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedTabIcon name="people-outline" size={size} color={color} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="notion"
+        options={{
+          title: 'Notion',
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedTabIcon name="book-outline" size={size} color={color} focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
+          href: null,
         }}
       />
     </Tabs>

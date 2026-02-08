@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   creatorLink: {
     ...TYPOGRAPHY.body,
-    color: COLORS.purple,
+    color: COLORS.accent,
     fontWeight: '600',
   },
   footer: {

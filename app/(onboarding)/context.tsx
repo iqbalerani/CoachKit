@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Button from '../../components/Button';
+import { AnimatedProgressBar, StaggerList } from '../../components/animated';
 import { COLORS } from '../../constants/colors';
 import { TYPOGRAPHY, SPACING, RADIUS } from '../../constants/typography';
 
@@ -22,8 +23,8 @@ export default function Context() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.progressBar}>
-        <View style={[styles.progressFill, { width: '66%' }]} />
+      <View style={styles.progressContainer}>
+        <AnimatedProgressBar progress={0.66} />
       </View>
 
       <KeyboardAvoidingView
@@ -39,44 +40,46 @@ export default function Context() {
             Your coaches will use this to personalize every session.
           </Text>
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Your name</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="e.g. Sarah"
-              placeholderTextColor={COLORS.textMuted}
-            />
-          </View>
+          <StaggerList baseDelay={200} staggerDelay={100}>
+            <View style={styles.field}>
+              <Text style={styles.label}>Your name</Text>
+              <TextInput
+                style={styles.input}
+                value={name}
+                onChangeText={setName}
+                placeholder="e.g. Sarah"
+                placeholderTextColor={COLORS.textMuted}
+              />
+            </View>
 
-          <View style={styles.field}>
-            <Text style={styles.label}>What are you working on?</Text>
-            <TextInput
-              style={[styles.input, styles.multiline]}
-              value={focus}
-              onChangeText={setFocus}
-              placeholder="e.g. Building a side project while working full-time"
-              placeholderTextColor={COLORS.textMuted}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-          </View>
+            <View style={styles.field}>
+              <Text style={styles.label}>What are you working on?</Text>
+              <TextInput
+                style={[styles.input, styles.multiline]}
+                value={focus}
+                onChangeText={setFocus}
+                placeholder="e.g. Building a side project while working full-time"
+                placeholderTextColor={COLORS.textMuted}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+            </View>
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Biggest goal this year</Text>
-            <TextInput
-              style={[styles.input, styles.multiline]}
-              value={goal}
-              onChangeText={setGoal}
-              placeholder="e.g. Launch my app and get 100 users"
-              placeholderTextColor={COLORS.textMuted}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-          </View>
+            <View style={styles.field}>
+              <Text style={styles.label}>Biggest goal this year</Text>
+              <TextInput
+                style={[styles.input, styles.multiline]}
+                value={goal}
+                onChangeText={setGoal}
+                placeholder="e.g. Launch my app and get 100 users"
+                placeholderTextColor={COLORS.textMuted}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+            </View>
+          </StaggerList>
         </ScrollView>
 
         <View style={styles.footer}>
@@ -100,17 +103,9 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
-  progressBar: {
-    height: 4,
-    backgroundColor: COLORS.border,
+  progressContainer: {
     marginHorizontal: SPACING.xl,
     marginTop: SPACING.md,
-    borderRadius: 2,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: COLORS.accent,
-    borderRadius: 2,
   },
   content: {
     paddingHorizontal: SPACING.xl,

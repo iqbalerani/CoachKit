@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserContext } from '../types';
-import { getUser, saveUser } from '../services/storage';
+import { getUser, saveUser, setCurrentUserId } from '../services/storage';
+import { useAuth } from './useAuth';
 
 interface UserState {
   user: UserContext | null;
@@ -17,15 +18,24 @@ const UserCtx = createContext<UserState>({
 });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
+  const { session } = useAuth();
   const [user, setUserState] = useState<UserContext | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!session) {
+      setUserState(null);
+      setIsLoading(false);
+      return;
+    }
+
+    setCurrentUserId(session.userId);
+    setIsLoading(true);
     getUser().then(u => {
       setUserState(u);
       setIsLoading(false);
     });
-  }, []);
+  }, [session]);
 
   const setUser = useCallback(async (newUser: UserContext) => {
     setUserState(newUser);

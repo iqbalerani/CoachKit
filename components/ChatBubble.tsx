@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Message } from '../types';
+import { FadeInView } from './animated';
 import { COLORS } from '../constants/colors';
 import { TYPOGRAPHY, SPACING } from '../constants/typography';
 
@@ -14,25 +15,27 @@ export default function ChatBubble({ message, coachIcon, accentColor = COLORS.ac
   const isUser = message.role === 'user';
 
   return (
-    <View style={[styles.container, isUser ? styles.userContainer : styles.coachContainer]}>
-      {!isUser && coachIcon && (
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{coachIcon}</Text>
+    <FadeInView direction={isUser ? 'right' : 'left'} distance={20} duration={200}>
+      <View style={[styles.container, isUser ? styles.userContainer : styles.coachContainer]}>
+        {!isUser && coachIcon && (
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{coachIcon}</Text>
+          </View>
+        )}
+        <View
+          style={[
+            styles.bubble,
+            isUser
+              ? [styles.userBubble, { backgroundColor: accentColor }]
+              : styles.coachBubble,
+          ]}
+        >
+          <Text style={[styles.text, isUser && styles.userText]}>
+            {message.content}
+          </Text>
         </View>
-      )}
-      <View
-        style={[
-          styles.bubble,
-          isUser
-            ? [styles.userBubble, { backgroundColor: accentColor }]
-            : styles.coachBubble,
-        ]}
-      >
-        <Text style={[styles.text, isUser && styles.userText]}>
-          {message.content}
-        </Text>
       </View>
-    </View>
+    </FadeInView>
   );
 }
 
