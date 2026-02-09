@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoachKit — Connecting...</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F2F3F7;
+      color: #1A1D2E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #E2E4EA;
+      border-top-color: #3B5BDB;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h1 { font-size: 20px; margin-bottom: 8px; }
+    p { font-size: 14px; color: #6B7280; margin-bottom: 16px; }
+    .fallback { display: none; }
+    .fallback a {
+      display: inline-block;
+      background: #3B5BDB;
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .error { color: #E53E3E; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div id="loading">
+      <div class="spinner"></div>
+      <h1>Redirecting to CoachKit...</h1>
+      <p>You'll be taken back to the app in a moment.</p>
+      <div id="fallback" class="fallback">
+        <p>Didn't redirect automatically?</p>
+        <a id="fallback-link" href="#">Open CoachKit</a>
+      </div>
+    </div>
+    <div id="error" style="display:none;">
+      <h1 class="error">Something went wrong</h1>
+      <p id="error-message"></p>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var code = params.get('code');
+      var error = params.get('error');
+
+      if (error) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('error-message').textContent =
+          'Notion returned an error: ' + error;
+        return;
+      }
+
+      if (!code) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('error-message').textContent =
+          'No authorization code received. Please try connecting again from the app.';
+        return;
+      }
+
+      var deepLink = 'coachkit://oauth?code=' + encodeURIComponent(code);
+
+      // Set up manual fallback link
+      var fallbackLink = document.getElementById('fallback-link');
+      fallbackLink.href = deepLink;
+
+      // Show fallback button after 2 seconds
+      setTimeout(function () {
+        document.getElementById('fallback').style.display = 'block';
+      }, 2000);
+
+      // Redirect to the app
+      window.location.replace(deepLink);
+    })();
+  </script>
+</body>
+</html>

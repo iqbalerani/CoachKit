@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "iqbalerani",
     "name": "CoachKit",
     "slug": "coachkit",
     "version": "1.0.0",
@@ -31,6 +32,18 @@
       "expo-router",
       "expo-secure-store",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7d13b663-82e4-4f77-ada7-d7e26d659118"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7d13b663-82e4-4f77-ada7-d7e26d659118"
+    }
   }
 }

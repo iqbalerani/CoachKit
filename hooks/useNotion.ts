@@ -19,7 +19,11 @@ export function useNotion() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const redirectUri = AuthSession.makeRedirectUri({ scheme: 'coachkit', path: 'oauth' });
+  // HTTPS URL that matches the Notion integration's redirect URI setting
+  const notionRedirectUri = 'https://iqbalerani.github.io/CoachKit/oauth/';
+
+  // Custom scheme URL for the app to detect the callback via deep link
+  const appRedirectUri = AuthSession.makeRedirectUri({ scheme: 'coachkit', path: 'oauth' });
 
   useEffect(() => {
     getNotionConnection().then(conn => {
@@ -32,16 +36,16 @@ export function useNotion() {
   const connect = useCallback(async () => {
     setIsConnecting(true);
     try {
-      const authUrl = getNotionOAuthUrl(redirectUri);
+      const authUrl = getNotionOAuthUrl(notionRedirectUri);
 
-      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, appRedirectUri);
 
       if (result.type === 'success' && result.url) {
         const url = new URL(result.url);
         const code = url.searchParams.get('code');
 
         if (code) {
-          const conn = await exchangeCodeForToken(code, redirectUri);
+          const conn = await exchangeCodeForToken(code, notionRedirectUri);
           setConnection(conn);
           setIsConnected(true);
           return conn;
@@ -54,7 +58,7 @@ export function useNotion() {
     } finally {
       setIsConnecting(false);
     }
-  }, [redirectUri]);
+  }, [notionRedirectUri, appRedirectUri]);
 
   const disconnect = useCallback(async () => {
     await deleteNotionConnection();
