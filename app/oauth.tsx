@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Platform } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { exchangeCodeForToken } from '../services/notion';
@@ -19,12 +18,6 @@ export default function OAuthCallback() {
     if (!code) {
       setError('No authorization code received.');
       return;
-    }
-
-    // On Android, the Chrome Custom Tab stays on top after the deep link fires.
-    // Dismiss it so the user can see this screen.
-    if (Platform.OS === 'android') {
-      WebBrowser.dismissBrowser().catch(() => {});
     }
 
     exchangeCodeForToken(code, NOTION_REDIRECT_URI)

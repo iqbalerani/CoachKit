@@ -47,7 +47,6 @@ export default function RootLayout() {
                   <Stack.Screen name="(seeker)" />
                   <Stack.Screen name="(builder)" />
                   <Stack.Screen name="oauth" />
-                  <Stack.Screen name="marketplace" />
                   <Stack.Screen name="settings" />
                 </Stack>
               </NotionSyncProvider>
