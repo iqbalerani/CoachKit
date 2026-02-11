@@ -8,8 +8,11 @@ export function useChat(coach: Coach | undefined) {
   const { user } = useUser();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [session, setSession] = useState<ChatSession | null>(null);
   const sessionRef = useRef<ChatSession | null>(null);
+
+  const clearError = useCallback(() => setError(null), []);
 
   const loadSession = useCallback(async (coachId: string) => {
     const existing = await getSessionByCoach(coachId);
@@ -68,8 +71,10 @@ export function useChat(coach: Coach | undefined) {
       await saveSession(updatedSession);
 
       return true;
-    } catch (error) {
-      console.error('Failed to send message:', error);
+    } catch (err) {
+      console.error('Failed to send message:', err);
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setError(message);
       // Remove the optimistic user message on failure
       setMessages(messages);
       return false;
@@ -95,6 +100,8 @@ export function useChat(coach: Coach | undefined) {
   return {
     messages,
     isLoading,
+    error,
+    clearError,
     session,
     sendMessage,
     loadSession,

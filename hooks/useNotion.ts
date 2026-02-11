@@ -22,7 +22,11 @@ export function useNotion() {
   // HTTPS URL that matches the Notion integration's redirect URI setting
   const notionRedirectUri = 'https://iqbalerani.github.io/CoachKit/oauth/';
 
-  // Custom scheme URL for the app to detect the callback via deep link
+  // Custom scheme URI — used by openAuthSessionAsync to detect the callback.
+  // On iOS, ASWebAuthenticationSession handles this natively.
+  // On Android, the Chrome Custom Tab opens the GitHub Pages intermediary,
+  // which fires a deep link back to the app. app/oauth.tsx handles the token
+  // exchange and dismisses the Custom Tab.
   const appRedirectUri = AuthSession.makeRedirectUri({ scheme: 'coachkit', path: 'oauth' });
 
   useEffect(() => {
@@ -38,6 +42,10 @@ export function useNotion() {
     try {
       const authUrl = getNotionOAuthUrl(notionRedirectUri);
 
+      // iOS: ASWebAuthenticationSession handles the custom scheme redirect natively
+      // and returns the URL with the code.
+      // Android: openAuthSessionAsync resolves with 'dismiss' after app/oauth.tsx
+      // closes the Custom Tab. The connection is already saved by oauth.tsx.
       const result = await WebBrowser.openAuthSessionAsync(authUrl, appRedirectUri);
 
       if (result.type === 'success' && result.url) {

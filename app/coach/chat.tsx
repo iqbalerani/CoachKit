@@ -24,6 +24,7 @@ import { useCoaches } from '../../hooks/useCoaches';
 import { useChat } from '../../hooks/useChat';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useNotion } from '../../hooks/useNotion';
+import { useUser } from '../../hooks/useUser';
 import ChatBubble from '../../components/ChatBubble';
 import ChatInput from '../../components/ChatInput';
 import SessionSummaryCard from '../../components/SessionSummaryCard';
@@ -45,12 +46,14 @@ export default function ChatScreen() {
   const router = useRouter();
   const { getCoachById } = useCoaches();
   const coach = getCoachById(coachId || '');
-  const { messages, isLoading, session, sendMessage, loadSession, startNewSession } = useChat(coach);
+  const { messages, isLoading, error, clearError, session, sendMessage, loadSession, startNewSession } = useChat(coach);
   const { subscription, trackMessage, canSendMessage } = useSubscription();
   const { isConnected } = useNotion();
+  const { user } = useUser();
   const flatListRef = useRef<FlatList<Message>>(null);
   const [initialized, setInitialized] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showContextBanner, setShowContextBanner] = useState(true);
   const [summary, setSummary] = useState<SessionSummary | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [showPagePicker, setShowPagePicker] = useState(false);
@@ -103,6 +106,13 @@ export default function ChatScreen() {
       handleSend(initialPrompt);
     }
   }, [initialized]);
+
+  // Show error alert
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Connection Error', error, [{ text: 'OK', onPress: clearError }]);
+    }
+  }, [error]);
 
   // Restore summary from session
   useEffect(() => {
@@ -265,6 +275,17 @@ export default function ChatScreen() {
             </AnimatedPressable>
           )}
         </Animated.View>
+      )}
+
+      {showContextBanner && (user?.notionConnected || user?.importedFromNotion) && (
+        <View style={styles.contextBanner}>
+          <Text style={styles.contextBannerText}>
+            {'\u{1F4CB}'} Using your Notion context
+          </Text>
+          <AnimatedPressable onPress={() => setShowContextBanner(false)} style={styles.contextBannerClose}>
+            <Ionicons name="close" size={14} color={COLORS.textMuted} />
+          </AnimatedPressable>
+        </View>
       )}
 
       <KeyboardAvoidingView
@@ -470,6 +491,25 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     width: 18,
     textAlign: 'center',
+  },
+  contextBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: COLORS.accentLight,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  contextBannerText: {
+    ...TYPOGRAPHY.caption,
+    color: COLORS.textSecondary,
+  },
+  contextBannerClose: {
+    position: 'absolute',
+    right: SPACING.md,
+    padding: 4,
   },
   chatArea: {
     flex: 1,

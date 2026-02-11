@@ -190,7 +190,7 @@ export default function MarketplaceScreen() {
         />
       )}
 
-      {subscription.tier === 'creator' && (
+      {subscription.tier === 'pro' && (
         <View style={styles.publishBar}>
           <TouchableOpacity
             style={styles.publishButton}

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { AuthSession } from '../types';
 import * as authService from '../services/auth';
 import { setCurrentUserId } from '../services/storage';
+import { loginUser, logoutUser } from '../services/revenuecat';
 
 interface AuthState {
   session: AuthSession | null;
@@ -30,23 +31,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setSession(s);
       setIsAuthLoading(false);
+    }).catch(err => {
+      console.error('Failed to load auth session:', err);
+      setIsAuthLoading(false);
     });
   }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
     const s = await authService.signUp(email, password);
     setCurrentUserId(s.userId);
+    await loginUser(s.userId);
     setSession(s);
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const s = await authService.signIn(email, password);
     setCurrentUserId(s.userId);
+    await loginUser(s.userId);
     setSession(s);
   }, []);
 
   const signOut = useCallback(async () => {
     await authService.signOut();
+    await logoutUser();
     setCurrentUserId(null);
     setSession(null);
   }, []);

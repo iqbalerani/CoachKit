@@ -24,6 +24,9 @@ export default function Entry() {
     getUser().then(u => {
       setUser(u);
       setUserLoading(false);
+    }).catch(err => {
+      console.error('Failed to load user data:', err);
+      setUserLoading(false);
     });
   }, [session, isAuthLoading]);
 

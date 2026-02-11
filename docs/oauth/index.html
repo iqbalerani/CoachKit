@@ -91,10 +91,19 @@
       }
 
       var deepLink = 'coachkit://oauth?code=' + encodeURIComponent(code);
+      var isAndroid = /android/i.test(navigator.userAgent);
 
-      // Set up manual fallback link
+      // On Android, build an intent URL — Chrome Custom Tabs block plain
+      // custom-scheme URLs (both programmatic and <a> clicks).
+      var intentUrl = isAndroid
+        ? 'intent://oauth?code=' + encodeURIComponent(code) +
+          '#Intent;scheme=coachkit;package=com.coachkitai.app;' +
+          'S.browser_fallback_url=' + encodeURIComponent(window.location.href) + ';end'
+        : null;
+
+      // Set up manual fallback link (intent URL on Android, deep link on iOS)
       var fallbackLink = document.getElementById('fallback-link');
-      fallbackLink.href = deepLink;
+      fallbackLink.href = intentUrl || deepLink;
 
       // Show fallback button after 2 seconds
       setTimeout(function () {
@@ -102,7 +111,11 @@
       }, 2000);
 
       // Redirect to the app
-      window.location.replace(deepLink);
+      if (intentUrl) {
+        window.location.replace(intentUrl);
+      } else {
+        window.location.replace(deepLink);
+      }
     })();
   </script>
 </body>

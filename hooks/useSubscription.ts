@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SubscriptionState } from '../types';
 import { getSubscription, saveSubscription, incrementMessageCount } from '../services/storage';
+import { checkEntitlement } from '../services/revenuecat';
 import { FREE_DAILY_LIMIT } from '../constants/config';
 
 export function useSubscription() {
@@ -11,53 +12,42 @@ export function useSubscription() {
     lastMessageDate: new Date().toDateString(),
   });
 
-  useEffect(() => {
-    getSubscription().then(setSubscription);
+  const refresh = useCallback(async () => {
+    const hasPro = await checkEntitlement();
+    const stored = await getSubscription();
+
+    const updated: SubscriptionState = {
+      ...stored,
+      tier: hasPro ? 'pro' : 'free',
+      isActive: hasPro,
+    };
+
+    if (stored.tier !== updated.tier || stored.isActive !== updated.isActive) {
+      await saveSubscription(updated);
+    }
+    setSubscription(updated);
   }, []);
 
-  const refresh = useCallback(async () => {
-    const sub = await getSubscription();
-    setSubscription(sub);
-  }, []);
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const canSendMessage = useCallback(() => {
     if (subscription.tier !== 'free') return true;
     return subscription.messagesToday < FREE_DAILY_LIMIT;
   }, [subscription]);
 
-  const canCreateCoach = useCallback(() => {
-    return subscription.tier === 'creator';
-  }, [subscription]);
-
-  const canShareCoach = useCallback(() => {
-    return subscription.tier === 'creator';
-  }, [subscription]);
-
   const trackMessage = useCallback(async (): Promise<boolean> => {
     const allowed = await incrementMessageCount();
-    if (allowed) {
-      await refresh();
-    }
+    if (allowed) await refresh();
     return allowed;
   }, [refresh]);
-
-  const upgradeTier = useCallback(async (tier: 'pro' | 'creator') => {
-    const updated: SubscriptionState = {
-      ...subscription,
-      tier,
-      isActive: true,
-    };
-    await saveSubscription(updated);
-    setSubscription(updated);
-  }, [subscription]);
 
   return {
     subscription,
     canSendMessage,
-    canCreateCoach,
-    canShareCoach,
     trackMessage,
-    upgradeTier,
     refresh,
+    isPro: subscription.tier !== 'free',
   };
 }

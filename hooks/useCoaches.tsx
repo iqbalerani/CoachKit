@@ -31,6 +31,9 @@ export function CoachProvider({ children }: { children: React.ReactNode }) {
     getCustomCoaches().then(coaches => {
       setCustomCoaches(coaches);
       setIsLoading(false);
+    }).catch(err => {
+      console.error('Failed to load custom coaches:', err);
+      setIsLoading(false);
     });
   }, []);
 

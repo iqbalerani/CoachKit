@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,9 +8,11 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import RevenueCatUI from 'react-native-purchases-ui';
 import { useUser } from '../hooks/useUser';
 import { useAuth } from '../hooks/useAuth';
 import { useSubscription } from '../hooks/useSubscription';
+import { restorePurchases } from '../services/revenuecat';
 import { AnimatedPressable } from '../components/animated';
 import { COLORS } from '../constants/colors';
 import { TYPOGRAPHY, SPACING, RADIUS } from '../constants/typography';
@@ -19,10 +21,12 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { user, updateUser } = useUser();
   const { session, signOut } = useAuth();
-  const { subscription } = useSubscription();
+  const { subscription, refresh } = useSubscription();
   const [focus, setFocus] = useState(user?.currentFocus || '');
   const [goal, setGoal] = useState(user?.biggestGoal || '');
   const [role, setRole] = useState(user?.role || '');
+  const [strengths, setStrengths] = useState(user?.strengths || '');
+  const [struggles, setStruggles] = useState(user?.struggles || '');
 
   // Avatar spring
   const avatarScale = useSharedValue(0.8);
@@ -38,6 +42,8 @@ export default function SettingsScreen() {
       setFocus(user.currentFocus);
       setGoal(user.biggestGoal);
       setRole(user.role || '');
+      setStrengths(user.strengths || '');
+      setStruggles(user.struggles || '');
     }
   }, [user]);
 
@@ -45,7 +51,7 @@ export default function SettingsScreen() {
     updateUser({ [field]: value });
   };
 
-  const tierLabel = subscription.tier === 'free' ? 'Free' : subscription.tier === 'pro' ? 'Pro' : 'Creator';
+  const tierLabel = subscription.tier === 'free' ? 'Free' : 'Pro';
 
   return (
     <View style={styles.container}>
@@ -78,6 +84,9 @@ export default function SettingsScreen() {
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>
         <Text style={styles.sectionTitle}>My Context</Text>
+        {user?.importedFromNotion && (
+          <Text style={styles.notionBadge}>Synced from Notion</Text>
+        )}
 
         <View style={styles.field}>
           <Text style={styles.label}>Working on</Text>
@@ -117,6 +126,32 @@ export default function SettingsScreen() {
           />
         </View>
 
+        <View style={styles.field}>
+          <Text style={styles.label}>Strengths</Text>
+          <TextInput
+            style={styles.input}
+            value={strengths}
+            onChangeText={setStrengths}
+            onBlur={() => handleSave('strengths', strengths)}
+            placeholder="What are you good at?"
+            placeholderTextColor={COLORS.textMuted}
+            multiline
+          />
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Struggles</Text>
+          <TextInput
+            style={styles.input}
+            value={struggles}
+            onChangeText={setStruggles}
+            onBlur={() => handleSave('struggles', struggles)}
+            placeholder="What do you struggle with?"
+            placeholderTextColor={COLORS.textMuted}
+            multiline
+          />
+        </View>
+
         <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>Coaching Style</Text>
         <View style={styles.styleRow}>
           {(['gentle', 'balanced', 'direct'] as const).map(style => (
@@ -140,6 +175,32 @@ export default function SettingsScreen() {
             </AnimatedPressable>
           ))}
         </View>
+
+        <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>Subscription</Text>
+
+        <AnimatedPressable
+          style={styles.manageSubButton}
+          onPress={async () => {
+            await RevenueCatUI.presentCustomerCenter();
+          }}
+        >
+          <Text style={styles.manageSubText}>Manage Subscription</Text>
+        </AnimatedPressable>
+
+        <AnimatedPressable
+          style={[styles.manageSubButton, { marginTop: SPACING.sm }]}
+          onPress={async () => {
+            try {
+              await restorePurchases();
+              await refresh();
+              Alert.alert('Restored', 'Your purchases have been restored.');
+            } catch {
+              Alert.alert('Error', 'Could not restore purchases. Please try again.');
+            }
+          }}
+        >
+          <Text style={styles.manageSubText}>Restore Purchases</Text>
+        </AnimatedPressable>
 
         <AnimatedPressable
           style={styles.signOutButton}
@@ -231,6 +292,12 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: SPACING.md,
   },
+  notionBadge: {
+    ...TYPOGRAPHY.caption,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+    marginTop: -SPACING.xs,
+  },
   field: {
     marginBottom: SPACING.md,
   },
@@ -277,6 +344,17 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.bodySmall,
     color: COLORS.textSecondary,
     marginBottom: SPACING.sm,
+  },
+  manageSubButton: {
+    paddingVertical: 14,
+    borderRadius: RADIUS.md,
+    borderWidth: 1.5,
+    borderColor: COLORS.accent,
+    alignItems: 'center',
+  },
+  manageSubText: {
+    ...TYPOGRAPHY.button,
+    color: COLORS.accent,
   },
   signOutButton: {
     marginTop: SPACING.xl,

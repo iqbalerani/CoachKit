@@ -34,6 +34,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     getUser().then(u => {
       setUserState(u);
       setIsLoading(false);
+    }).catch(err => {
+      console.error('Failed to load user in UserProvider:', err);
+      setIsLoading(false);
     });
   }, [session]);
 

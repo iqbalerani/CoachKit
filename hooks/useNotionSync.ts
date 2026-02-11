@@ -15,11 +15,13 @@ export function useNotionSync() {
   const syncingRef = useRef(false);
 
   useEffect(() => {
-    getNotionSyncState().then(setSyncState);
+    getNotionSyncState().then(setSyncState).catch(err => {
+      console.error('Failed to load Notion sync state:', err);
+    });
   }, []);
 
-  const performSync = useCallback(async () => {
-    if (syncingRef.current) return;
+  const performSync = useCallback(async (): Promise<{ success: boolean; updatedFields?: string[] }> => {
+    if (syncingRef.current) return { success: false };
     syncingRef.current = true;
     setIsSyncing(true);
 
@@ -37,7 +39,21 @@ export function useNotionSync() {
       const content = await readNotionPage(pageId);
       const parsed = await parseNotionContext(content);
 
-      if (parsed.currentFocus || parsed.biggestGoal || parsed.role) {
+      const fieldLabels: Record<string, string> = {
+        currentFocus: 'Working on',
+        biggestGoal: 'Biggest goal',
+        role: 'Role',
+        strengths: 'Strengths',
+        struggles: 'Struggles',
+      };
+      const updatedFields: string[] = [];
+      for (const key of Object.keys(fieldLabels)) {
+        if (parsed[key as keyof typeof parsed]) {
+          updatedFields.push(fieldLabels[key]);
+        }
+      }
+
+      if (updatedFields.length > 0) {
         await updateUser({
           ...parsed,
           notionLastSyncAt: new Date().toISOString(),
@@ -54,6 +70,7 @@ export function useNotionSync() {
       setSyncState(successState);
       await saveNotionSyncState(successState);
       setLastSyncResult('success');
+      return { success: true, updatedFields };
     } catch (error: any) {
       const errorState: NotionSyncState = {
         ...syncState,
@@ -64,6 +81,7 @@ export function useNotionSync() {
       setSyncState(errorState);
       await saveNotionSyncState(errorState);
       setLastSyncResult('error');
+      return { success: false };
     } finally {
       setIsSyncing(false);
       syncingRef.current = false;

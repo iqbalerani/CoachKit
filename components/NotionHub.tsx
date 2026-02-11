@@ -15,12 +15,14 @@ import { AnimatedPressable } from './animated';
 import { ChatSession, Coach, NotionPage, UserContext } from '../types';
 import { COLORS } from '../constants/colors';
 import { TYPOGRAPHY, SPACING, RADIUS } from '../constants/typography';
+import { useRouter } from 'expo-router';
 
 export default function NotionHub() {
   const { connection, isConnected, isConnecting, connect, disconnect } = useNotion();
   const { syncState, isSyncing, performSync } = useNotionSync();
   const { user, updateUser } = useUser();
   const { addCoach } = useCoaches();
+  const router = useRouter();
 
   // Page picker state
   const [showPagePicker, setShowPagePicker] = useState(false);
@@ -192,7 +194,14 @@ export default function NotionHub() {
                 </View>
                 <AnimatedPressable
                   style={[styles.syncButton, isSyncing && styles.syncButtonDisabled]}
-                  onPress={performSync}
+                  onPress={async () => {
+                    const result = await performSync();
+                    if (result.success && result.updatedFields?.length) {
+                      Alert.alert('Sync Complete', `Updated: ${result.updatedFields.join(', ')}`);
+                    } else if (result.success) {
+                      Alert.alert('Sync Complete', 'No new data found to update.');
+                    }
+                  }}
                   disabled={isSyncing}
                 >
                   <Ionicons name="sync-outline" size={16} color="#FFFFFF" />
@@ -233,6 +242,35 @@ export default function NotionHub() {
                   onPress={() => openPagePicker('change')}
                 >
                   <Text style={styles.changePageText}>Change Page</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {/* Your Context */}
+          {user?.notionConnected && (user?.currentFocus || user?.biggestGoal || user?.role || user?.strengths || user?.struggles) && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Your Context</Text>
+              <View style={styles.card}>
+                {([
+                  ['Working on', user.currentFocus],
+                  ['Biggest goal', user.biggestGoal],
+                  ['Role', user.role],
+                  ['Strengths', user.strengths],
+                  ['Struggles', user.struggles],
+                ] as [string, string | undefined][]).map(([label, value]) => (
+                  <View key={label} style={styles.contextField}>
+                    <Text style={styles.contextLabel}>{label}</Text>
+                    <Text style={[styles.contextValue, !value && styles.contextValueEmpty]}>
+                      {value || 'Not set'}
+                    </Text>
+                  </View>
+                ))}
+                <TouchableOpacity
+                  style={styles.editSettingsLink}
+                  onPress={() => router.push('/settings')}
+                >
+                  <Text style={styles.editSettingsText}>Edit in Settings</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -436,6 +474,35 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   changePageText: {
+    ...TYPOGRAPHY.label,
+    color: COLORS.accent,
+  },
+  // Context
+  contextField: {
+    paddingVertical: SPACING.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  contextLabel: {
+    ...TYPOGRAPHY.caption,
+    color: COLORS.textMuted,
+    marginBottom: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  contextValue: {
+    ...TYPOGRAPHY.body,
+    color: COLORS.text,
+  },
+  contextValueEmpty: {
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+  },
+  editSettingsLink: {
+    marginTop: SPACING.sm,
+    alignSelf: 'flex-start',
+  },
+  editSettingsText: {
     ...TYPOGRAPHY.label,
     color: COLORS.accent,
   },

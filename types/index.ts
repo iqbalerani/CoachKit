@@ -97,7 +97,7 @@ export interface CachedQuote {
   enrolledCoachIds: string[];
 }
 
-export type SubscriptionTier = 'free' | 'pro' | 'creator';
+export type SubscriptionTier = 'free' | 'pro';
 
 export interface SubscriptionState {
   tier: SubscriptionTier;
